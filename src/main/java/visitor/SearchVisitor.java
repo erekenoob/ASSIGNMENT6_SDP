@@ -28,10 +28,15 @@ public class SearchVisitor implements Visitor {
 
     @Override
     public void visit(FileNode file) {
+        resetIfRootEntry();
+        if (matchesCriteria(file)) {
+            matchedPaths.add(buildRelativePath(file.getName()));
+        }
     }
 
     @Override
     public void visit(DirectoryNode directory) {
+        resetIfRootEntry();
         boolean isRootDirectory = (activeDepth == 0);
         if (!isRootDirectory) {
             pathSegments.addLast(directory.getName());
@@ -62,10 +67,21 @@ public class SearchVisitor implements Visitor {
         activeDepth = 0;
     }
 
-
+    private void resetIfRootEntry() {
+        if (activeDepth == 0) {
+            matchedPaths.clear();
+            pathSegments.clear();
+        }
+    }
 
     private boolean matchesCriteria(FileNode file) {
         return file.getName().contains(nameCriterion) && file.getSize() >= minSizeThreshold;
     }
 
+    private String buildRelativePath(String fileName) {
+        if (pathSegments.isEmpty()) {
+            return fileName;
+        }
+        return String.join("/", pathSegments) + "/" + fileName;
+    }
 }
