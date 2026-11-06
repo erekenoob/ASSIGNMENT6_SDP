@@ -28,11 +28,17 @@ public class DirectoryNode implements Element {
         return parent;
     }
 
+    void setParent(DirectoryNode parent) {
+        this.parent = parent;
+    }
 
     public void addChild(Element child) {
         Objects.requireNonNull(child, "Child element cannot be null");
         validateSingleParent(child);
+        validateNoDuplicateSibling(child.getName());
+        validateNoCycle(child);
 
+        attachParent(child);
         children.put(child.getName(), child);
     }
 
@@ -58,5 +64,27 @@ public class DirectoryNode implements Element {
         }
     }
 
+    private void validateNoDuplicateSibling(String childName) {
+        if (children.containsKey(childName)) {
+            throw new IllegalArgumentException("Duplicate sibling name '" + childName + "' in directory '" + name + "'");
+        }
+    }
 
+    private void validateNoCycle(Element child) {
+        DirectoryNode current = this;
+        while (current != null) {
+            if (current == child) {
+                throw new IllegalArgumentException("Cycle detected: cannot add ancestor or self as a child");
+            }
+            current = current.getParent();
+        }
+    }
+
+    private void attachParent(Element child) {
+        if (child instanceof FileNode file) {
+            file.setParent(this);
+        } else if (child instanceof DirectoryNode dir) {
+            dir.setParent(this);
+        }
+    }
 }
