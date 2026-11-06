@@ -10,11 +10,13 @@ public class TotalSizeVisitor implements Visitor {
 
     @Override
     public void visit(FileNode file) {
+        resetIfRootEntry();
         totalSize += file.getSize();
     }
 
     @Override
     public void visit(DirectoryNode directory) {
+        resetIfRootEntry();
         activeDepth++;
         try {
             for (Element child : directory.getChildren()) {
@@ -25,6 +27,18 @@ public class TotalSizeVisitor implements Visitor {
         }
     }
 
+    public long getTotalSize() {
+        return totalSize;
+    }
 
+    public void reset() {
+        totalSize = 0;
+        activeDepth = 0;
+    }
 
+    private void resetIfRootEntry() {
+        if (activeDepth == 0) {
+            totalSize = 0;
+        }
+    }
 }
