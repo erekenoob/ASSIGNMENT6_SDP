@@ -79,6 +79,34 @@ class FileSystemVisitorTest {
         assertEquals(5000L, sizeVisitor.getTotalSize());
     }
 
+    //T3 Search correctly combines both configurable filter conditions
+    @Test
+    void testSearchCombinesNameAndMinSizeThreshold() {
+        SearchVisitor searchVisitor = new SearchVisitor("App", 1000);
+        root.accept(searchVisitor);
+
+        List<String> matches = searchVisitor.getMatchingPaths();
+        assertEquals(2, matches.size());
+        assertTrue(matches.contains("src/main/App.java"));
+        assertTrue(matches.contains("test/AppTest.java"));
+        assertFalse(matches.contains("src/main/AppConfig.java")); // 800 < 1000
+    }
+
+    //T4 Search produces correct, deterministic, root-relative paths
+    @Test
+    void testSearchProducesDeterministicLexicographicallySortedPaths() {
+        SearchVisitor searchVisitor = new SearchVisitor(".java", 0);
+        root.accept(searchVisitor);
+
+        List<String> expectedOrder = List.of(
+                "src/main/App.java",
+                "src/main/AppConfig.java",
+                "src/module-info.java",
+                "test/AppTest.java"
+        );
+        assertEquals(expectedOrder, searchVisitor.getMatchingPaths());
+    }
+    
 
     //T8 Invalid tree mutations are rejected while valid nesting remains supported
     @Test
