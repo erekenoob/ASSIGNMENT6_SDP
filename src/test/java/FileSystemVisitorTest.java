@@ -40,7 +40,37 @@ class FileSystemVisitorTest {
         root.addChild(new FileNode("pom.xml", 500));
     }
 
+    //T1 Both element types reach the correct overloaded visit methods
+    @Test
+    void testDoubleDispatchReachesCorrectOverloadedMethods() {
+        class SpyVisitor implements Visitor {
+            int fileVisits = 0;
+            int directoryVisits = 0;
 
+            @Override
+            public void visit(FileNode file) {
+                fileVisits++;
+            }
+
+            @Override
+            public void visit(DirectoryNode directory) {
+                directoryVisits++;
+            }
+        }
+
+        SpyVisitor spy = new SpyVisitor();
+        FileNode singleFile = new FileNode("single.txt", 100);
+        DirectoryNode singleDir = new DirectoryNode("folder");
+
+        singleFile.accept(spy);
+        singleDir.accept(spy);
+
+        assertEquals(1, spy.fileVisits);
+        assertEquals(1, spy.directoryVisits);
+    }
+
+
+    //T8 Invalid tree mutations are rejected while valid nesting remains supported
     @Test
     void testInvalidTreeMutationsAreRejected() {
         // Negative file size
