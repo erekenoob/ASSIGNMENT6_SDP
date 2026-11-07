@@ -69,6 +69,16 @@ class FileSystemVisitorTest {
         assertEquals(1, spy.directoryVisits);
     }
 
+    //T2 Size accumulation across multiple nesting levels is correct
+    @Test
+    void testTotalSizeAccumulationAcrossNestingLevels() {
+        TotalSizeVisitor sizeVisitor = new TotalSizeVisitor();
+        root.accept(sizeVisitor);
+
+        // 1500 + 800 + 200 + 2000 + 500 = 5000
+        assertEquals(5000L, sizeVisitor.getTotalSize());
+    }
+
 
     //T8 Invalid tree mutations are rejected while valid nesting remains supported
     @Test
