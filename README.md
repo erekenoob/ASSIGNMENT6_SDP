@@ -1,11 +1,5 @@
-# Advanced File System (Visitor Pattern)
+# Visitor Pattern
 
-##  Project Overview
-This project is an in-memory hierarchical file system developed for **Assignment 06** in the **Software Design Patterns** course. It demonstrates the practical application of the **Visitor Behavioral Design Pattern** to perform independent operations over an object structure without modifying the elements themselves.
-
-The project strictly adheres to Clean Code principles, utilizing **Double Dispatch** to avoid runtime type checking (`instanceof`) and preserving the integrity of the file system hierarchy.
-
----
 
 ##  Architecture & Features
 
