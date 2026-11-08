@@ -106,7 +106,52 @@ class FileSystemVisitorTest {
         );
         assertEquals(expectedOrder, searchVisitor.getMatchingPaths());
     }
-    
+
+    //T5 Statistics are correct for nesting, counting and maximum depth
+    @Test
+    void testStatisticsVisitorCountsAndDepth() {
+        StatisticsVisitor statsVisitor = new StatisticsVisitor();
+        root.accept(statsVisitor);
+
+        assertEquals(5, statsVisitor.getDirectoryCount());
+        assertEquals(5, statsVisitor.getFileCount());
+        assertEquals(3, statsVisitor.getMaxDepth());
+    }
+
+    //T6 Empty structures and no-match search cases are handled
+    @Test
+    void testEmptyStructuresAndNoMatchCases() {
+        TotalSizeVisitor sizeVisitor = new TotalSizeVisitor();
+        emptyDir.accept(sizeVisitor);
+        assertEquals(0L, sizeVisitor.getTotalSize());
+
+        StatisticsVisitor statsVisitor = new StatisticsVisitor();
+        emptyDir.accept(statsVisitor);
+        assertEquals(1, statsVisitor.getDirectoryCount());
+        assertEquals(0, statsVisitor.getFileCount());
+        assertEquals(0, statsVisitor.getMaxDepth());
+
+        SearchVisitor noMatchSearch = new SearchVisitor("non_existent_file", 99999);
+        root.accept(noMatchSearch);
+        assertTrue(noMatchSearch.getMatchingPaths().isEmpty());
+    }
+
+    //T7 Repeat executions do not leak or multiply accumulated state
+    @Test
+    void testRepeatExecutionsDoNotLeakState() {
+        TotalSizeVisitor sizeVisitor = new TotalSizeVisitor();
+        root.accept(sizeVisitor);
+        assertEquals(5000L, sizeVisitor.getTotalSize());
+
+        root.accept(sizeVisitor);
+        assertEquals(5000L, sizeVisitor.getTotalSize());
+
+        StatisticsVisitor statsVisitor = new StatisticsVisitor();
+        root.accept(statsVisitor);
+        root.accept(statsVisitor);
+        assertEquals(5, statsVisitor.getFileCount());
+        assertEquals(5, statsVisitor.getDirectoryCount());
+    }
 
     //T8 Invalid tree mutations are rejected while valid nesting remains supported
     @Test
